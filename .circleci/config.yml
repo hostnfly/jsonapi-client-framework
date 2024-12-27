@@ -18,7 +18,7 @@ jobs:
       - install-package
       - run:
           name: Running tests
-          command: python -m unittest tests
+          command: python -m unittest discover tests
 
   lint:
     docker:

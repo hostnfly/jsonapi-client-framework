@@ -1,0 +1,7 @@
+indent-width = 4
+line-length = 120
+
+[lint.per-file-ignores]
+"__init__.py" = [
+    "F401",  # Module imported but unused
+]
