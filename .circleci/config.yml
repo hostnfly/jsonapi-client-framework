@@ -2,21 +2,39 @@
 # See: https://circleci.com/docs/configuration-reference
 version: 2.1
 
-jobs:
-  tests:
-    docker:
-      - image: cimg/python:3.13
+commands:
+  install-package:
     steps:
       - checkout
       - run:
           name: Installing package
           command: pip install .
+
+jobs:
+  tests:
+    docker:
+      - image: cimg/python:3.13
+    steps:
+      - install-package
       - run:
           name: Running tests
           command: python -m unittest tests
+
+  lint:
+    docker:
+      - image: cimg/python:3.13
+    steps:
+      - install-package
+      - run:
+          name: Installing optional requirements
+          command: pip install -r requirements-dev.txt
+      - run:
+          name: Running linter
+          command: python -m ruff check
 
 workflows:
   version: 2
   ruby-3.13:
     jobs:
       - tests
+      - lint
