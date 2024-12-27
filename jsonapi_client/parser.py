@@ -59,7 +59,7 @@ class JsonAPIParser:
         if included_data:
             return cls.parse(data=included_data, included=included, parsed_by_type_and_id=parsed_by_type_and_id)
 
-        return {"id": data["id"]}
+        return data
 
     @classmethod
     def find_included_data(

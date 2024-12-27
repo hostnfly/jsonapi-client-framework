@@ -21,22 +21,21 @@ class JsonAPIResourcesListPaginated(Generic[T]):
         url: str,
         auth: AuthBase,
         schema: type[JsonAPIResourceSchema],
-        include: JsonAPIIncludeValue | None = None,
         page: dict[str, int] | None = None,
     ) -> None:
         self.url = url
         self.auth = auth
         self.schema = schema
-        self.include = include
         self.page = page
 
     def get(
         self,
         filters: dict[str, JsonAPIFilterValue] | None = None,
         sort: JsonAPISortValue | None = None,
+        include: JsonAPIIncludeValue | None = None,
         extra_params: dict[str, str] | None = None,
     ) -> tuple[list[T], dict[str, Any]]:
-        query = JsonAPIQuery(filters=filters, sort=sort, page=self.page, include=self.include)
+        query = JsonAPIQuery(filters=filters, sort=sort, page=self.page, include=include)
         extra_params = extra_params or {}
         params = {**query.to_request_params(), **extra_params}
         response = request("GET", self.url, auth=self.auth, params=params, timeout=DEFAULT_TIMEOUT)
@@ -55,23 +54,27 @@ class JsonAPIResourcesList(Generic[T]):
         url: str,
         auth: AuthBase,
         schema: type[JsonAPIResourceSchema],
-        include: JsonAPIIncludeValue | None = None,
     ) -> None:
         self.url = url
         self.auth = auth
         self.schema = schema
-        self.include = include
 
     def get(
         self,
         filters: dict[str, JsonAPIFilterValue] | None = None,
         sort: JsonAPISortValue | None = None,
+        include: JsonAPIIncludeValue | None = None,
         extra_params: dict[str, str] | None = None,
     ) -> list[T]:
         results = []
         next_page = 1
         while next_page:
-            resources, meta = self.paginated(page=next_page).get(filters=filters, sort=sort, extra_params=extra_params)
+            resources, meta = self.paginated(page=next_page).get(
+                filters=filters,
+                sort=sort,
+                include=include,
+                extra_params=extra_params,
+            )
             results += resources
             next_page = meta["pagination"].get("next")
         return results
@@ -83,5 +86,4 @@ class JsonAPIResourcesList(Generic[T]):
             auth=self.auth,
             schema=self.schema,
             page=jsonapi_page,
-            include=self.include,
         )

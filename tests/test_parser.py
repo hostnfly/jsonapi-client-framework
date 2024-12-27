@@ -37,8 +37,8 @@ class TestParser(TestCase):
 
         self.assertEqual(parsed["id"], "1")
         self.assertEqual(parsed["title"], "Das weiße Band - Eine deutsche Kindergeschichte")
-        self.assertEqual(parsed["director"], {"id": "1"})
-        self.assertEqual(parsed["characters"], [{"id": "2"}, {"id": "3"}])
+        self.assertEqual(parsed["director"], {"id": "1", "type": "person"})
+        self.assertEqual(parsed["characters"], [{"id": "2", "type": "character"}, {"id": "3", "type": "character"}])
 
     def test_parse_list(self) -> None:
         parsed = cast("list", JsonAPIParser.parse(
