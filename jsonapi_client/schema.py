@@ -18,3 +18,10 @@ class JsonAPIError:
     status: str
     detail: str
     code: str
+
+
+@dataclass_json
+@dataclass
+class JsonAPIResourceIdentifier:
+    id: str
+    type: str

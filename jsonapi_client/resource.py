@@ -20,15 +20,13 @@ class JsonAPIResource(Generic[T]):
         url: str,
         auth: AuthBase,
         schema: type[JsonAPIResourceSchema],
-        include: JsonAPIIncludeValue | None = None,
     ) -> None:
         self.url = url
         self.auth = auth
-        self.include = include
         self.schema = schema
 
-    def get(self) -> T:
-        query = JsonAPIQuery(include=self.include)
+    def get(self, include: JsonAPIIncludeValue | None = None) -> T:
+        query = JsonAPIQuery(include=include)
         response = request(
             "GET", self.url,
             auth=self.auth,
@@ -38,8 +36,8 @@ class JsonAPIResource(Generic[T]):
         handle_status_code(response)
         return self.__deserialize_resource(response.json())
 
-    def update(self, **kwargs: list[Any] | dict[str, Any] | JsonType) -> T:
-        query = JsonAPIQuery(include=self.include)
+    def update(self, include: JsonAPIIncludeValue | None = None, **kwargs: list[Any] | dict[str, Any] | JsonType) -> T:
+        query = JsonAPIQuery(include=include)
         payload = JsonAPISerializer.tojsonapi(**kwargs)
         response = request(
             "PUT", self.url,
