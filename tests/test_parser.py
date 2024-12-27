@@ -3,7 +3,6 @@ from unittest import TestCase
 
 from jsonapi_client.parser import JsonAPIParser
 
-
 class TestParser(TestCase):
     def test_parse(self) -> None:
         parsed = cast("dict", JsonAPIParser.parse(
