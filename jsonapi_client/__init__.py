@@ -1,4 +1,7 @@
+from datetime import datetime
+
+from .decoders import register
 from .collection import JsonAPICollection, JsonAPISingleton, T
 from .query import JsonAPIFilterValue, JsonAPIQuery, JsonAPISortValue, JsonAPIIncludeValue
 
-VERSION = "0.0.3"
+register(datetime,  datetime.fromisoformat)

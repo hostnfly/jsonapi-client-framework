@@ -2,7 +2,6 @@ from typing import Any, cast
 
 Json = dict[str, Any] | list[dict[str, Any]]
 
-
 class JsonAPIParser:
     @classmethod
     def parse(

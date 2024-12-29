@@ -1,10 +1,6 @@
 from dataclasses import dataclass
-from datetime import date, datetime
 
-from dataclasses_json import cfg, dataclass_json
-
-cfg.global_config.decoders[date] = date.fromisoformat
-cfg.global_config.decoders[datetime] = datetime.fromisoformat
+from dataclasses_json import dataclass_json
 
 
 @dataclass_json
