@@ -2,6 +2,12 @@
 
 Json:API Client Framework provides an object-oriented approach to build your [Json:API](https://jsonapi.org/) clients.
 
+## Installing
+
+```sh
+pip install jsonapi-client-framework
+```
+
 ## Usage
 
 ```python
