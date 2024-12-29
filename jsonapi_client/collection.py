@@ -37,7 +37,7 @@ class JsonAPICollection(ABC, Generic[T]):
 
     def resource(self, resource_id: str) -> JsonAPIResource[T]:
         return JsonAPIResource[T](
-            url=f"{self.base_url}{self.__full_path(resource_id)}",
+            url=f"{self.base_url}{self._full_path(resource_id)}",
             auth=self.auth,
             schema=self.schema,
         )
@@ -49,5 +49,5 @@ class JsonAPICollection(ABC, Generic[T]):
             schema=self.schema,
         )
 
-    def __full_path(self, resource_id: str) -> str:
+    def _full_path(self, resource_id: str) -> str:
         return f"{self.endpoint}/{quote(resource_id)}"

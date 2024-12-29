@@ -98,7 +98,7 @@ movie.director.id  # => "7"
 movie = movies.resource("178").get(include="director")
 movie.director.year_of_birth  # => 1961
 
-# GET https://your_api.domain.com/v1/movies/178?include=director&page=2
+# GET https://your_api.domain.com/v1/movies/178?include=director&page=1
 # ...
 # GET https://your_api.domain.com/v1/movies/178?include=director&page=117
 movies_list_with_directors = movies.resources().get(include="director")
@@ -146,6 +146,79 @@ its [authentication](https://docs.python-requests.org/en/latest/user/authenticat
 from requests.auth import HTTPBasicAuth
 
 people = People(base_url="https://your_api.domain.com/v1", auth=HTTPBasicAuth('user', 'pass'))
+```
+
+### Sub-collections
+
+```python
+from jsonapi_client import JsonAPIResourceSchema
+
+
+class Movie(JsonAPIResourceSchema):
+    title: str
+
+
+class Theater(JsonAPIResourceSchema):
+    name: str
+
+
+class Theaters(JsonAPICollection[Theater]):
+    endpoint = "/theaters"
+    schema = Theater
+
+
+class Movies(JsonAPICollection[Movie]):
+    endpoint = "/movies"
+    schema = Movie
+
+    def theaters(self):
+        return Theaters(base_url=f"{self.base_url}{self.endpoint}", auth=self.auth)
+
+
+movies = Movies(base_url="https://your_api.domain.com/v1", auth=HTTPBasicAuth('user', 'pass'))
+
+# GET https://your_api.domain.com/v1/movies/theaters?page=1
+# ...
+# GET https://your_api.domain.com/v1/movies/theaters&page=6
+theaters_list = movies.theaters().resources().get()
+```
+
+### Sub-resources
+
+```python
+from jsonapi_client import JsonAPIResourceSchema
+from jsonapi_client.resource import JsonAPIResource
+
+
+class Movie(JsonAPIResourceSchema):
+    title: str
+
+
+class Character(JsonAPIResourceSchema):
+    name: str
+
+
+class Characters(JsonAPICollection[Character]):
+    endpoint = "/characters"
+    schema = Theater
+
+
+class MovieResource(JsonAPIResource[Movie]):
+    def characters(self):
+        return Characters(base_url=self.url, auth=self.auth)
+
+
+class Movies(JsonAPICollection[Movie]):
+    endpoint = "/movies"
+    schema = Movie
+
+
+movies = Movies(base_url="https://your_api.domain.com/v1", auth=HTTPBasicAuth('user', 'pass'))
+
+# GET https://your_api.domain.com/v1/movies/34/characters?page=1
+# ...
+# GET https://your_api.domain.com/v1/movies/34/characters?page=5
+characters_list = movies.resource("34").characters().get()
 ```
 
 ### Custom encoding/decoding
