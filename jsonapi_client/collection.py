@@ -10,15 +10,15 @@ from .schema import JsonAPIResourceSchema
 
 T = TypeVar("T", bound=JsonAPIResourceSchema)
 
-def full_path(path_prefix: str, endpoint: str, resource_id: str | None = None) -> str:
+def full_path(path_prefix: str | None, endpoint: str, resource_id: str | None = None) -> str:
     return f"{path_prefix or ""}{endpoint}{'' if resource_id is None else f'/{resource_id}'}"
 
 class JsonAPISingleton(ABC, Generic[T]):
-    path_prefix: str
+    path_prefix: str | None = None
     endpoint: str
     schema: type[JsonAPIResourceSchema]
 
-    def __init__(self, base_url: str, auth: AuthBase) -> None:
+    def __init__(self, base_url: str, auth: AuthBase | None = None) -> None:
         self.base_url = base_url
         self.auth = auth
 
@@ -31,11 +31,11 @@ class JsonAPISingleton(ABC, Generic[T]):
 
 
 class JsonAPICollection(ABC, Generic[T]):
-    path_prefix: str
+    path_prefix: str | None = None
     endpoint: str
     schema: type[JsonAPIResourceSchema]
 
-    def __init__(self, base_url: str, auth: AuthBase) -> None:
+    def __init__(self, base_url: str, auth: AuthBase | None = None) -> None:
         self.base_url = base_url
         self.auth = auth
 
