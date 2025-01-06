@@ -4,6 +4,7 @@ from urllib.parse import quote
 
 from requests.auth import AuthBase  # type: ignore[import-untyped]
 
+from .request import JsonAPIClient
 from .resource import JsonAPIResource
 from .resources_list import JsonAPIResourcesList
 from .schema import JsonAPIResourceSchema
@@ -20,11 +21,9 @@ class JsonAPISingleton(ABC, Generic[T]):
         self.auth = auth
 
     def resource(self) -> JsonAPIResource[T]:
-        return JsonAPIResource[T](
-            url=f"{self.base_url}{self.endpoint}",
-            auth=self.auth,
-            schema=self.schema,
-        )
+        url = f"{self.base_url}{self.endpoint}"
+        client = JsonAPIClient[T](url=url, schema=self.schema, auth=self.auth)
+        return JsonAPIResource[T](client)
 
 
 class JsonAPICollection(ABC, Generic[T]):
@@ -37,19 +36,12 @@ class JsonAPICollection(ABC, Generic[T]):
         self.default_page_size = default_page_size
 
     def resource(self, resource_id: str) -> JsonAPIResource[T]:
-        return JsonAPIResource[T](
-            url=f"{self.base_url}{self._full_path(resource_id)}",
-            auth=self.auth,
-            schema=self.schema,
-        )
+        url = f"{self.base_url}{self.endpoint}/{quote(resource_id)}"
+        client = JsonAPIClient[T](url=url, schema=self.schema, auth=self.auth)
+        return JsonAPIResource[T](client)
 
     def resources(self) -> JsonAPIResourcesList[T]:
-        return JsonAPIResourcesList[T](
-            url=f"{self.base_url}{self.endpoint}",
-            auth=self.auth,
-            schema=self.schema,
-            default_page_size=self.default_page_size,
-        )
+        url = f"{self.base_url}{self.endpoint}"
+        client = JsonAPIClient[T](url=url, schema=self.schema, auth=self.auth)
+        return JsonAPIResourcesList[T](client, default_page_size=self.default_page_size)
 
-    def _full_path(self, resource_id: str) -> str:
-        return f"{self.endpoint}/{quote(resource_id)}"
