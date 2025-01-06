@@ -11,8 +11,6 @@ from .schema import JsonAPIResourceSchema
 
 T = TypeVar("T", bound=JsonAPIResourceSchema)
 
-DEFAULT_PAGE_SIZE = 30
-
 
 class JsonAPIResourcesListPaginated(Generic[T]):
     def __init__(
@@ -54,10 +52,12 @@ class JsonAPIResourcesList(Generic[T]):
         url: str,
         auth: AuthBase,
         schema: type[JsonAPIResourceSchema],
+        default_page_size: int | None = None,
     ) -> None:
         self.url = url
         self.auth = auth
         self.schema = schema
+        self.default_page_size = default_page_size
 
     def get(
         self,
@@ -79,8 +79,12 @@ class JsonAPIResourcesList(Generic[T]):
             next_page = meta["pagination"].get("next")
         return results
 
-    def paginated(self, page: int | None = None, size: int = DEFAULT_PAGE_SIZE) -> JsonAPIResourcesListPaginated[T]:
-        jsonapi_page = None if page is None else {"number": page, "size": size}
+    def paginated(self, page: int | None = None, size: int | None = None) -> JsonAPIResourcesListPaginated[T]:
+        jsonapi_page = {} if page is None else {"number": page}
+        if size is None:
+            size = self.default_page_size
+        if size is not None:
+            jsonapi_page["size"] = size
         return JsonAPIResourcesListPaginated(
             url=self.url,
             auth=self.auth,
