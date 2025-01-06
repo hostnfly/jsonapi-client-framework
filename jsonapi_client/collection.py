@@ -31,9 +31,10 @@ class JsonAPICollection(ABC, Generic[T]):
     endpoint: str
     schema: type[JsonAPIResourceSchema]
 
-    def __init__(self, base_url: str, auth: AuthBase | None = None) -> None:
+    def __init__(self, base_url: str, auth: AuthBase | None = None, default_page_size: int | None = None) -> None:
         self.base_url = base_url
         self.auth = auth
+        self.default_page_size = default_page_size
 
     def resource(self, resource_id: str) -> JsonAPIResource[T]:
         return JsonAPIResource[T](
@@ -47,6 +48,7 @@ class JsonAPICollection(ABC, Generic[T]):
             url=f"{self.base_url}{self.endpoint}",
             auth=self.auth,
             schema=self.schema,
+            default_page_size=self.default_page_size,
         )
 
     def _full_path(self, resource_id: str) -> str:
