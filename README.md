@@ -39,17 +39,17 @@ people = People(base_url="https://your_api.domain.com/v1")
 # GET https://your_api.domain.com/v1/people?page[number]=2
 # ...
 # GET https://your_api.domain.com/v1/people?page[number]=23
-people_list = people.resources().get()
+people_list = people.list().all()
 ```
 
 ### Get a single result's page
 
 ```python
 # GET https://your_api.domain.com/v1/people?page[number]=2
-people_list, meta = people.resources().paginated(page=2).get()
+people_list, meta = people.list().paginated(page=2)
 
 # GET https://your_api.domain.com/v1/people?page[number]=2&page[size]=30
-people_list, meta = people.resources().paginated(page=2, size=30).get()
+people_list, meta = people.list().paginated(page=2, size=30)
 ```
 
 ### Filter results
@@ -58,7 +58,7 @@ people_list, meta = people.resources().paginated(page=2, size=30).get()
 # GET https://your_api.domain.com/v1/people?filter[date_of_birth]=1984&page=1
 # ...
 # GET https://your_api.domain.com/v1/people?filter[date_of_birth]=1984&page=4
-people_list = people.resources().get(filters={"date_of_birth": 1984})
+people_list = people.list(filters={"date_of_birth": 1984}).all()
 ```
 
 ### Sort results
@@ -67,7 +67,7 @@ people_list = people.resources().get(filters={"date_of_birth": 1984})
 # GET https://your_api.domain.com/v1/people?sort=first_name,last_name&page=1
 # ...
 # GET https://your_api.domain.com/v1/people?sort=first_name,last_name&page=23
-people_list = people.resources().get(sort=["first_name", "last_name"])
+people_list = people.list(sort=["first_name", "last_name"]).all()
 ```
 
 ### Related resources
@@ -101,7 +101,7 @@ movie.director.year_of_birth  # => 1961
 # GET https://your_api.domain.com/v1/movies/178?include=director&page=1
 # ...
 # GET https://your_api.domain.com/v1/movies/178?include=director&page=117
-movies_list_with_directors = movies.resources().get(include="director")
+movies_list_with_directors = movies.list(include="director").all()
 ```
 
 ### Get a single resource as an object
@@ -180,7 +180,7 @@ movies = Movies(base_url="https://your_api.domain.com/v1", auth=HTTPBasicAuth('u
 # GET https://your_api.domain.com/v1/movies/theaters?page=1
 # ...
 # GET https://your_api.domain.com/v1/movies/theaters&page=6
-theaters_list = movies.theaters().resources().get()
+theaters_list = movies.theaters().list().all()
 ```
 
 ### Sub-resources
@@ -218,7 +218,7 @@ movies = Movies(base_url="https://your_api.domain.com/v1", auth=HTTPBasicAuth('u
 # GET https://your_api.domain.com/v1/movies/34/characters?page=1
 # ...
 # GET https://your_api.domain.com/v1/movies/34/characters?page=5
-characters_list = movies.resource("34").characters().get()
+characters_list = movies.resource("34").characters().list().all()
 ```
 
 ### Custom encoding/decoding

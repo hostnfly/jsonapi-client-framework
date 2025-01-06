@@ -4,6 +4,7 @@ from urllib.parse import quote
 
 from requests.auth import AuthBase  # type: ignore[import-untyped]
 
+from .query import JsonAPIFilterValue, JsonAPIIncludeValue, JsonAPISortValue
 from .request import JsonAPIClient
 from .resource import JsonAPIResource
 from .resources_list import JsonAPIResourcesList
@@ -40,8 +41,21 @@ class JsonAPICollection(ABC, Generic[T]):
         client = JsonAPIClient[T](url=url, schema=self.schema, auth=self.auth)
         return JsonAPIResource[T](client)
 
-    def resources(self) -> JsonAPIResourcesList[T]:
+    def list(
+        self,
+        filters: dict[str, JsonAPIFilterValue] | None = None,
+        sort: JsonAPISortValue | None = None,
+        include: JsonAPIIncludeValue | None = None,
+        extra_params: dict[str, str] | None = None,
+    ) -> JsonAPIResourcesList[T]:
         url = f"{self.base_url}{self.endpoint}"
         client = JsonAPIClient[T](url=url, schema=self.schema, auth=self.auth)
-        return JsonAPIResourcesList[T](client, default_page_size=self.default_page_size)
+        return JsonAPIResourcesList[T](
+            client=client,
+            default_page_size=self.default_page_size,
+            filters=filters,
+            sort=sort,
+            include=include,
+            extra_params=extra_params,
+        )
 
