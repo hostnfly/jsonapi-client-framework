@@ -1,29 +1,16 @@
 from typing import Any, Generic, TypeVar, cast
 
-from requests import request  # type: ignore[import-untyped]
-from requests.auth import AuthBase  # type: ignore[import-untyped]
 
-from .parser import JsonAPIParser
 from .query import JsonAPIFilterValue, JsonAPIIncludeValue, JsonAPIQuery, JsonAPISortValue
-from .request import DEFAULT_TIMEOUT
-from .response import handle_status_code
+from .request import JsonAPIClient
 from .schema import JsonAPIResourceSchema
 
 T = TypeVar("T", bound=JsonAPIResourceSchema)
 
 
 class JsonAPIResourcesListPaginated(Generic[T]):
-    def __init__(
-        self,
-        *,
-        url: str,
-        auth: AuthBase,
-        schema: type[JsonAPIResourceSchema],
-        page: dict[str, int] | None = None,
-    ) -> None:
-        self.url = url
-        self.auth = auth
-        self.schema = schema
+    def __init__(self, client: JsonAPIClient, page: dict[str, int] | None = None) -> None:
+        self.client = client
         self.page = page
 
     def get(
@@ -35,28 +22,13 @@ class JsonAPIResourcesListPaginated(Generic[T]):
     ) -> tuple[list[T], dict[str, Any]]:
         query = JsonAPIQuery(filters=filters, sort=sort, page=self.page, include=include)
         extra_params = extra_params or {}
-        params = {**query.to_request_params(), **extra_params}
-        response = request("GET", self.url, auth=self.auth, params=params, timeout=DEFAULT_TIMEOUT)
-        handle_status_code(response)
-        return self.__deserialize_resources(response.json()), response.json()["meta"]
-
-    def __deserialize_resources(self, payload: dict[str, Any]) -> list[T]:
-        parsed_list = JsonAPIParser().parse(**payload)
-        return cast("list[T]", [cast("Any", self.schema).from_dict(parsed) for parsed in parsed_list])
+        results, meta = self.client.get({**query.to_request_params(), **extra_params})
+        return cast("list[T]", results), meta
 
 
 class JsonAPIResourcesList(Generic[T]):
-    def __init__(
-        self,
-        *,
-        url: str,
-        auth: AuthBase,
-        schema: type[JsonAPIResourceSchema],
-        default_page_size: int | None = None,
-    ) -> None:
-        self.url = url
-        self.auth = auth
-        self.schema = schema
+    def __init__(self, client: JsonAPIClient, default_page_size: int | None = None) -> None:
+        self.client = client
         self.default_page_size = default_page_size
 
     def get(
@@ -81,13 +53,7 @@ class JsonAPIResourcesList(Generic[T]):
 
     def paginated(self, page: int | None = None, size: int | None = None) -> JsonAPIResourcesListPaginated[T]:
         jsonapi_page = {} if page is None else {"number": page}
-        if size is None:
-            size = self.default_page_size
+        size = size or self.default_page_size
         if size is not None:
             jsonapi_page["size"] = size
-        return JsonAPIResourcesListPaginated(
-            url=self.url,
-            auth=self.auth,
-            schema=self.schema,
-            page=jsonapi_page,
-        )
+        return JsonAPIResourcesListPaginated(self.client, page=jsonapi_page)
