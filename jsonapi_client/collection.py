@@ -17,35 +17,42 @@ class JsonAPISingleton(ABC, Generic[T]):
     endpoint: str
     schema: type[JsonAPIResourceSchema]
 
-    def __init__(self, base_url: str, auth: AuthBase | None = None) -> None:
+    def __init__(self, base_url: str, auth: AuthBase | None = None, include: JsonAPIIncludeValue | None = None) -> None:
         self.base_url = base_url
         self.auth = auth
+        self.include = include
 
     def resource(self) -> JsonAPIResource[T]:
         url = f"{self.base_url}{self.endpoint}"
         client = JsonAPIClient[T](url=url, schema=self.schema, auth=self.auth)
-        return JsonAPIResource[T](client)
+        return JsonAPIResource[T](client, include=self.include)
 
 
 class JsonAPICollection(ABC, Generic[T]):
     endpoint: str
     schema: type[JsonAPIResourceSchema]
 
-    def __init__(self, base_url: str, auth: AuthBase | None = None, default_page_size: int | None = None) -> None:
+    def __init__(
+        self,
+        base_url: str,
+        auth: AuthBase | None = None,
+        default_page_size: int | None = None,
+        include: JsonAPIIncludeValue | None = None,
+    ) -> None:
         self.base_url = base_url
         self.auth = auth
         self.default_page_size = default_page_size
+        self.include = include
 
     def resource(self, resource_id: str) -> JsonAPIResource[T]:
         url = f"{self.base_url}{self.endpoint}/{quote(resource_id)}"
         client = JsonAPIClient[T](url=url, schema=self.schema, auth=self.auth)
-        return JsonAPIResource[T](client)
+        return JsonAPIResource[T](client, include=self.include)
 
     def list(
         self,
         filters: dict[str, JsonAPIFilterValue] | None = None,
         sort: JsonAPISortValue | None = None,
-        include: JsonAPIIncludeValue | None = None,
         extra_params: dict[str, str] | None = None,
     ) -> JsonAPIResourcesList[T]:
         url = f"{self.base_url}{self.endpoint}"
@@ -55,7 +62,7 @@ class JsonAPICollection(ABC, Generic[T]):
             default_page_size=self.default_page_size,
             filters=filters,
             sort=sort,
-            include=include,
+            include=self.include,
             extra_params=extra_params,
         )
 
