@@ -10,15 +10,16 @@ T = TypeVar("T", bound=JsonAPIResourceSchema)
 
 
 class JsonAPIResource(Generic[T]):
-    def __init__(self, client: JsonAPIClient) -> None:
+    def __init__(self, client: JsonAPIClient, *, include: JsonAPIIncludeValue | None = None) -> None:
         self.client = client
+        self.include = include
 
-    def get(self, include: JsonAPIIncludeValue | None = None) -> T:
-        query = JsonAPIQuery(include=include)
+    def get(self) -> T:
+        query = JsonAPIQuery(include=self.include)
         return cast("T", self.client.get(query.to_request_params())[0])
 
-    def update(self, include: JsonAPIIncludeValue | None = None, **kwargs: list[Any] | dict[str, Any] | JsonType) -> T:
-        query = JsonAPIQuery(include=include)
+    def update(self, **kwargs: list[Any] | dict[str, Any] | JsonType) -> T:
+        query = JsonAPIQuery(include=self.include)
         payload = JsonAPISerializer.tojsonapi(**kwargs)
         return cast("T", self.client.put(payload, query.to_request_params())[0])
 
