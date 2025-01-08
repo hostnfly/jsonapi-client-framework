@@ -89,19 +89,19 @@ class Movies(JsonAPICollection[Movie]):
 
 
 movies = Movies(base_url="https://your_api.domain.com/v1")
-
 # GET https://your_api.domain.com/v1/movies/178
 movie = movies.resource("178").get()
 movie.director.id  # => "7"
 
+movies_with_director = Movies(base_url="https://your_api.domain.com/v1", include="diretor")
 # GET https://your_api.domain.com/v1/movies/178?include=director
-movie = movies.resource("178").get(include="director")
+movie = movies_with_director.resource("178").get()
 movie.director.year_of_birth  # => 1961
 
 # GET https://your_api.domain.com/v1/movies/178?include=director&page=1
 # ...
 # GET https://your_api.domain.com/v1/movies/178?include=director&page=117
-movies_list_with_directors = movies.list(include="director").all()
+movies_list = movies_with_director.list().all()
 ```
 
 ### Get a single resource as an object
