@@ -5,10 +5,14 @@ class TestResourceSchema(TestCase):
   def test_resource_equality(self) -> None:
     resource1 = JsonAPIResourceSchema(id="123")
     resource2 = JsonAPIResourceSchema(id="123")
-    resource3 = JsonAPIResourceSchema(id="456")
 
     self.assertEqual(resource1, resource2)
-    self.assertNotEqual(resource1, resource3)
+
+  def test_resource_equality_different_id(self) -> None:
+    resource1 = JsonAPIResourceSchema(id="123")
+    resource2 = JsonAPIResourceSchema(id="456")
+
+    self.assertNotEqual(resource1, resource2)
 
   def test_resource_equality_different_classes(self) -> None:
     class A(JsonAPIResourceSchema):

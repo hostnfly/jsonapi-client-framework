@@ -10,9 +10,7 @@ class JsonAPIResourceSchema:
     id: str
 
     def __eq__(self, other: Any) -> bool:
-        if isinstance(other, JsonAPIResourceSchema) and self.__class__ == other.__class__:
-            return self.id == other.id
-        return False
+        return isinstance(other, self.__class__) and self.id == other.id
 
 @dataclass_json
 @dataclass
