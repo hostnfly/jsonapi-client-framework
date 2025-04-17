@@ -1,4 +1,5 @@
-from typing import Any, Generic, TypeVar, cast
+from types import UnionType
+from typing import Any, Generic, TypeVar, cast, get_args
 
 import jsonpickle  # type: ignore[import-untyped]
 from requests import request  # type: ignore[import-untyped]
@@ -38,7 +39,7 @@ class APIError(Exception):
 
 
 class JsonAPIClient(Generic[T]):
-    def __init__(self, url: str, schema: type[JsonAPIResourceSchema], auth: AuthBase | None = None) -> None:
+    def __init__(self, url: str, schema: type[JsonAPIResourceSchema] | UnionType, auth: AuthBase | None = None) -> None:
         self.url = url
         self.schema = schema
         self.auth = auth
@@ -79,8 +80,19 @@ class JsonAPIClient(Generic[T]):
         parsed = JsonAPIParser().parse(**json)
         meta = cast("dict[str, Any]", json["meta"])
         if isinstance(parsed, list):
-            results = [cast("T", cast("Any", self.schema).from_dict(r)) for r in parsed]
+            results = [self.__deserializer_resource(r) for r in parsed]
             return results, meta
 
-        result = cast("T", cast("Any", self.schema).from_dict(parsed))
-        return result, meta
+        return self.__deserializer_resource(parsed), meta
+
+    def __deserializer_resource(self, jsonapi_resource: dict[str, Any]) -> T:
+        if isinstance(self.schema, UnionType):
+            for schema_type in get_args(self.schema):
+                try:
+                    return cast("T", cast("Any", schema_type).from_dict(jsonapi_resource))
+                except KeyError as e:
+                    last_error = e
+                    pass
+            raise last_error
+
+        return cast("T", cast("Any", self.schema).from_dict(jsonapi_resource))
