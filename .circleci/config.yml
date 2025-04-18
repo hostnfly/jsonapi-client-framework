@@ -43,12 +43,12 @@ jobs:
       - install-package
       - install-dev-requirements
       - run:
-          name: Running linter
+          name: Running type checking
           command: python -m mypy --explicit-package-bases .
 
 workflows:
   version: 2
-  ruby-3.13:
+  python-3.13:
     jobs:
       - tests
       - lint

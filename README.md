@@ -73,9 +73,10 @@ people_list = people.list(sort=["first_name", "last_name"]).all()
 ### Related resources
 
 ```python
-from jsonapi_client import JsonAPIResourceIdentifier
+from jsonapi_client import JsonAPICollection, JsonAPIResourceIdentifier
 
 
+@dataclass
 class Movie(JsonAPIResourceSchema):
     title: str
     year: int
@@ -83,7 +84,7 @@ class Movie(JsonAPIResourceSchema):
     director: Person | JsonAPIResourceIdentifier
 
 
-class Movies(JsonAPICollection[Movie]):
+class JsonAPIMovies(JsonAPICollection[Movie]):
     endpoint = "/movies"
     schema = Movie
 

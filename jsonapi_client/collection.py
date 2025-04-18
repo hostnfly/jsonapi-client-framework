@@ -5,7 +5,7 @@ from urllib.parse import quote
 from requests.auth import AuthBase  # type: ignore[import-untyped]
 
 from .query import JsonAPIFilterValue, JsonAPIIncludeValue, JsonAPISortValue
-from .request import JsonAPIClient
+from .client import JsonAPIClient
 from .resource import JsonAPIResource
 from .resources_list import JsonAPIResourcesList
 from .schema import JsonAPIResourceSchema

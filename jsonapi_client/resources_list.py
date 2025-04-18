@@ -2,7 +2,7 @@ from typing import Any, Generic, TypeVar, cast
 
 
 from .query import JsonAPIFilterValue, JsonAPIIncludeValue, JsonAPIQuery, JsonAPISortValue
-from .request import JsonAPIClient
+from .client import JsonAPIClient
 from .schema import JsonAPIResourceSchema
 
 T = TypeVar("T", bound=JsonAPIResourceSchema)
