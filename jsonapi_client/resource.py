@@ -2,7 +2,7 @@ from typing import Any, Generic, TypeVar, cast
 
 
 from .query import JsonAPIIncludeValue, JsonAPIQuery
-from .request import JsonAPIClient
+from .client import JsonAPIClient
 from .schema import JsonAPIResourceSchema
 from .serializer import JsonAPISerializer, JsonType
 
