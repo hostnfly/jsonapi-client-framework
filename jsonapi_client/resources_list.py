@@ -1,6 +1,5 @@
 from typing import Any, Generic, TypeVar, cast
 
-
 from .query import JsonAPIFilterValue, JsonAPIIncludeValue, JsonAPIQuery, JsonAPISortValue
 from .client import JsonAPIClient
 from .schema import JsonAPIResourceSchema
