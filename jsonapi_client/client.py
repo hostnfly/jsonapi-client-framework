@@ -48,6 +48,11 @@ class JsonAPIClient(Generic[T]):
         response = self.__perform_request("GET", params)
         return self.__deserialize_payload(response)
 
+    def post(self, payload: dict[str, Any], params: dict[str, Any] | None = None) -> tuple[T, dict[str, Any]]:
+        response = self.__perform_request("POST", params, payload)
+        resource, meta = self.__deserialize_payload(response)
+        return cast("T", resource), meta
+
     def put(self, payload: dict[str, Any], params: dict[str, Any] | None = None) -> tuple[T, dict[str, Any]]:
         response = self.__perform_request("PUT", params, payload)
         resource, meta = self.__deserialize_payload(response)
