@@ -1,14 +1,15 @@
 from abc import ABC
-from typing import Generic, TypeVar
+from typing import Any, Generic, TypeVar
 from urllib.parse import quote
 
 from requests.auth import AuthBase  # type: ignore[import-untyped]
 
-from .query import JsonAPIFilterValue, JsonAPIIncludeValue, JsonAPISortValue
+from .query import JsonAPIFilterValue, JsonAPIIncludeValue, JsonAPIQuery, JsonAPISortValue
 from .client import JsonAPIClient
 from .resource import JsonAPIResource
 from .resources_list import JsonAPIResourcesList
 from .schema import JsonAPIResourceSchema
+from .serializer import JsonAPISerializer, JsonType
 
 T = TypeVar("T", bound=JsonAPIResourceSchema)
 
@@ -48,6 +49,13 @@ class JsonAPICollection(ABC, Generic[T]):
         url = f"{self.base_url}{self.endpoint}/{quote(resource_id)}"
         client = JsonAPIClient[T](url=url, schema=self.schema, auth=self.auth)
         return JsonAPIResource[T](client, include=self.include)
+
+    def create(self, **kwargs: list[Any] | dict[str, Any] | JsonType) -> T:
+        url = f"{self.base_url}{self.endpoint}"
+        client = JsonAPIClient[T](url=url, schema=self.schema, auth=self.auth)
+        query = JsonAPIQuery(include=self.include)
+        payload = JsonAPISerializer.tojsonapi(**kwargs)
+        return client.post(payload, query.to_request_params())[0]
 
     def list(
         self,

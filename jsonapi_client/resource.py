@@ -18,11 +18,6 @@ class JsonAPIResource(Generic[T]):
         query = JsonAPIQuery(include=self.include)
         return cast("T", self.client.get(query.to_request_params())[0])
 
-    def create(self, **kwargs: list[Any] | dict[str, Any] | JsonType) -> T:
-        query = JsonAPIQuery(include=self.include)
-        payload = JsonAPISerializer.tojsonapi(**kwargs)
-        return cast("T", self.client.post(payload, query.to_request_params())[0])
-
     def update(self, **kwargs: list[Any] | dict[str, Any] | JsonType) -> T:
         query = JsonAPIQuery(include=self.include)
         payload = JsonAPISerializer.tojsonapi(**kwargs)
