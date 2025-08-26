@@ -83,7 +83,7 @@ class JsonAPIClient(Generic[T]):
     def __deserialize_payload(self, response: Response) -> tuple[T | list[T], dict[str, Any]]:
         json = response.json()
         parsed = JsonAPIParser().parse(**json)
-        meta = cast("dict[str, Any]", json["meta"])
+        meta = cast("dict[str, Any]", json.get("meta", {}))
         if isinstance(parsed, list):
             results = [self.__deserializer_resource(r) for r in parsed]
             return results, meta

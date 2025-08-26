@@ -1,5 +1,6 @@
 
 from pathlib import Path
+from typing import cast
 
 from unittest.mock import MagicMock, patch
 from dataclasses import dataclass
@@ -67,4 +68,21 @@ class TestClient(TestCase):
         self.assertEqual(meta["total"], 2)
         self.assertIsInstance(result[0], Movie)
         self.assertIsInstance(result[1], Series)
+
+    @patch("jsonapi_client.client.request")
+    def test_get_no_meta(self, test_request: MagicMock) -> None:
+        client: JsonAPIClient[Movie] = JsonAPIClient(url="http://example.com/api", schema=Movie, auth=None)
+        fixture = Path("tests/fixtures/movie.json")
+        response = Response()
+        response.status_code = 200
+        response._content = fixture.read_bytes()
+        test_request.return_value = response
+
+        result, meta = client.get()
+        result = cast("Movie", result)
+
+        self.assertEqual(meta, {})
+        self.assertEqual(result.title, "Funny Games")
+        self.assertEqual(result.year, 1997)
+        self.assertEqual(result.director.full_name, "Michael Haneke")
 
