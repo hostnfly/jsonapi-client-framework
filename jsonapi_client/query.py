@@ -1,7 +1,7 @@
 from datetime import date
 from typing import Any, TypeAlias
 
-JsonAPIFilterValue: TypeAlias = str | bool | date | list[str] | list[date]
+JsonAPIFilterValue: TypeAlias = str | int | bool | date | list[str] | list[date]
 JsonAPISortValue: TypeAlias = str | list[str]
 JsonAPIIncludeValue: TypeAlias = str | list[str]
 
