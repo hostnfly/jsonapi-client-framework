@@ -1,11 +1,11 @@
 from unittest import TestCase
 
-from jsonapi_client.serializer import JsonAPISerializer
+from jsonapi_client.serializer import serialize
 
 
 class TestSerializer(TestCase):
     def test_serializer_resource_attribute(self) -> None:
-        serialized = JsonAPISerializer.tojsonapi(name="Lana Wachowski")
+        serialized = serialize(name="Lana Wachowski")
 
         self.assertEqual(
             serialized,
@@ -19,7 +19,7 @@ class TestSerializer(TestCase):
         )
 
     def test_serializer_resource_attribute_none(self) -> None:
-        serialized = JsonAPISerializer.tojsonapi(gender=None)
+        serialized = serialize(gender=None)
 
         self.assertEqual(
             serialized,
@@ -33,7 +33,7 @@ class TestSerializer(TestCase):
         )
 
     def test_serializer_resource_attribute_list(self) -> None:
-        serialized = JsonAPISerializer.tojsonapi(sequence=[1, 2, 3])
+        serialized = serialize(sequence=[1, 2, 3])
 
         self.assertEqual(
             serialized,
@@ -47,7 +47,7 @@ class TestSerializer(TestCase):
         )
 
     def test_serializer_resource_relationship(self) -> None:
-        serialized = JsonAPISerializer.tojsonapi(director={"id": "1", "type": "person"})
+        serialized = serialize(director={"id": "1", "type": "person"})
 
         self.assertEqual(
             serialized,
@@ -63,7 +63,7 @@ class TestSerializer(TestCase):
         )
 
     def test_serializer_resource_relationship_none(self) -> None:
-        serialized = JsonAPISerializer.tojsonapi(director={"id": None})
+        serialized = serialize(director={"id": None})
 
         self.assertEqual(
             serialized, {
@@ -78,7 +78,7 @@ class TestSerializer(TestCase):
         )
 
     def test_serializer_resource_relationship_list(self) -> None:
-        serialized = JsonAPISerializer.tojsonapi(
+        serialized = serialize(
             directors=[
                 {"id": "1", "type": "person"},
                 {"id": "2", "type": "person"},
@@ -102,7 +102,7 @@ class TestSerializer(TestCase):
         )
 
     def test_serializer_resource_relationship_list_empty(self) -> None:
-        serialized = JsonAPISerializer.tojsonapi(children=[{"id": None}])
+        serialized = serialize(children=[{"id": None}])
 
         self.assertEqual(
             serialized,

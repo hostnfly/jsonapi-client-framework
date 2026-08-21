@@ -1,7 +1,9 @@
 from typing import Any, Generic, TypeVar, cast
 
-from .query import JsonAPIFilterValue, JsonAPIIncludeValue, JsonAPIQuery, JsonAPISortValue
 from .client import JsonAPIClient
+from .parser import parse
+from .query import JsonAPIFilterValue, JsonAPIIncludeValue, JsonAPIQuery, JsonAPISortValue
+from .resource import deserialize_resource
 from .schema import JsonAPIResourceSchema
 
 T = TypeVar("T", bound=JsonAPIResourceSchema)
@@ -10,6 +12,7 @@ T = TypeVar("T", bound=JsonAPIResourceSchema)
 class JsonAPIResourcesList(Generic[T]):
     def __init__(
         self,
+        schema: type[JsonAPIResourceSchema],
         client: JsonAPIClient,
         default_page_size: int | None = None,
         filters: dict[str, JsonAPIFilterValue] | None = None,
@@ -17,6 +20,7 @@ class JsonAPIResourcesList(Generic[T]):
         include: JsonAPIIncludeValue | None = None,
         extra_params: dict[str, str] | None = None,
     ) -> None:
+        self.schema = schema
         self.client = client
         self.default_page_size = default_page_size
         self.filters = filters
@@ -30,7 +34,7 @@ class JsonAPIResourcesList(Generic[T]):
         while next_page:
             resources, meta = self.paginated(page=next_page)
             results += resources
-            next_page = meta["pagination"].get("next")
+            next_page = meta.get("pagination", {}).get("next")
         return results
 
     def paginated(self, page: int | None = None, size: int | None = None) -> tuple[list[T], dict[str, Any]]:
@@ -39,5 +43,7 @@ class JsonAPIResourcesList(Generic[T]):
         if size is not None:
             jsonapi_page["size"] = size
         query = JsonAPIQuery(filters=self.filters, sort=self.sort, page=jsonapi_page, include=self.include)
-        results, meta = self.client.get({**query.to_request_params(), **self.extra_params})
-        return cast("list[T]", results), meta
+        params = {**query.to_request_params(), **self.extra_params}
+        payload = self.client.get(params)
+        parsed = cast("list", parse(**payload))
+        return cast("list[T]", [deserialize_resource(self.schema, p) for p in parsed]), payload["meta"]

@@ -1,8 +1,8 @@
 from datetime import date, datetime
 
-from .decoders import register
 from .collection import JsonAPICollection, JsonAPISingleton, T
-from .query import JsonAPIFilterValue, JsonAPIQuery, JsonAPISortValue, JsonAPIIncludeValue
+from .decoders import register
+from .query import JsonAPIFilterValue, JsonAPIIncludeValue, JsonAPIQuery, JsonAPISortValue
 from .schema import JsonAPIResourceIdentifier, JsonAPIResourceSchema
 
 register(date, date.fromisoformat)

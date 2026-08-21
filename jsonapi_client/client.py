@@ -1,13 +1,11 @@
-from types import UnionType
-from typing import Any, Generic, TypeVar, cast, get_args
+from typing import Any, Generic, TypeVar, cast
 
 import jsonpickle  # type: ignore[import-untyped]
-from requests import request  # type: ignore[import-untyped]
-from requests.auth import AuthBase  # type: ignore[import-untyped]
-from requests.models import Response  # type: ignore[import-untyped]
+from requests import request
+from requests.auth import AuthBase
+from requests.models import Response
 
-from .parser import JsonAPIParser
-from .schema import JsonAPIResourceSchema, JsonAPIError
+from .schema import JsonAPIError, JsonAPIResourceSchema
 
 T = TypeVar("T", bound=JsonAPIResourceSchema)
 
@@ -39,65 +37,34 @@ class APIError(Exception):
 
 
 class JsonAPIClient(Generic[T]):
-    def __init__(self, url: str, schema: type[JsonAPIResourceSchema] | UnionType, auth: AuthBase | None = None) -> None:
+    def __init__(self, url: str, auth: AuthBase | None = None) -> None:
         self.url = url
-        self.schema = schema
         self.auth = auth
 
-    def get(self, params: dict[str, Any] | None = None) -> tuple[T | list[T], dict[str, Any]]:
-        response = self.__perform_request("GET", params)
-        return self.__deserialize_payload(response)
+    def get(self, params: dict[str, Any] | None = None) -> dict[str, Any]:
+        return self.http("GET", params)
 
-    def post(self, payload: dict[str, Any], params: dict[str, Any] | None = None) -> tuple[T, dict[str, Any]]:
-        response = self.__perform_request("POST", params, payload)
-        resource, meta = self.__deserialize_payload(response)
-        return cast("T", resource), meta
+    def post(self, payload: dict[str, Any], params: dict[str, Any] | None = None) -> dict[str, Any]:
+        return self.http("POST", params, payload)
 
-    def put(self, payload: dict[str, Any], params: dict[str, Any] | None = None) -> tuple[T, dict[str, Any]]:
-        response = self.__perform_request("PUT", params, payload)
-        resource, meta = self.__deserialize_payload(response)
-        return cast("T", resource), meta
+    def put(self, payload: dict[str, Any], params: dict[str, Any] | None = None) -> dict[str, Any]:
+        return self.http("PUT", params, payload)
 
-    def delete(self) -> None:
-        self.__perform_request("DELETE")
+    def delete(self) -> dict[str, Any]:
+        return self.http("DELETE")
 
-    def __perform_request(
-      self,
-      method: str,
-      params: dict[str, Any] | None = None,
-      payload: dict[str, Any] | None = None
-    ) -> Response:
+    def http(self, method: str, params: dict[str, Any] | None = None, payload: dict[str, Any] | None = None) -> dict[str, Any]:
         body = None if payload is None else jsonpickle.encode(payload, unpicklable=False)
-        response = request(
-          method=method,
-          url=self.url,
-          auth=self.auth,
-          params=params,
-          data=body,
-          headers={"Content-Type": "application/json"},
-          timeout=DEFAULT_TIMEOUT,
-        )
+        response = request(method=method, params=params, data=body, **self.default_params)
         handle_status_code(response)
-        return response
+        return cast("dict[str, Any]", response.json())
 
-    def __deserialize_payload(self, response: Response) -> tuple[T | list[T], dict[str, Any]]:
-        json = response.json()
-        parsed = JsonAPIParser().parse(**json)
-        meta = cast("dict[str, Any]", json.get("meta", {}))
-        if isinstance(parsed, list):
-            results = [self.__deserializer_resource(r) for r in parsed]
-            return results, meta
+    @property
+    def default_params(self) -> dict[str, Any]:
+        return {
+            "url": self.url,
+            "auth": self.auth,
+            "timeout": DEFAULT_TIMEOUT,
+            "headers": {"Content-Type": "application/json"},
+        }
 
-        return self.__deserializer_resource(parsed), meta
-
-    def __deserializer_resource(self, jsonapi_resource: dict[str, Any]) -> T:
-        if isinstance(self.schema, UnionType):
-            for schema_type in get_args(self.schema):
-                try:
-                    return cast("T", cast("Any", schema_type).from_dict(jsonapi_resource))
-                except KeyError as e:
-                    last_error = e
-                    pass
-            raise last_error
-
-        return cast("T", cast("Any", self.schema).from_dict(jsonapi_resource))

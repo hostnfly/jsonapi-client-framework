@@ -1,5 +1,5 @@
-from datetime import datetime
 from collections.abc import Callable
+from datetime import datetime
 from typing import Any
 
 import jsonpickle  # type: ignore[import-untyped]
