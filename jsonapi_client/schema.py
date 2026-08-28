@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Any
 
 from dataclasses_json import dataclass_json
 
@@ -9,7 +8,7 @@ from dataclasses_json import dataclass_json
 class JsonAPIResourceSchema:
     id: str
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, self.__class__) and self.id == other.id
 
 @dataclass_json
@@ -26,5 +25,5 @@ class JsonAPIResourceIdentifier:
     id: str
     type: str
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, self.__class__) and self.id == other.id and self.type == other.type

@@ -1,11 +1,12 @@
 from typing import cast
 from unittest import TestCase
 
-from jsonapi_client.parser import JsonAPIParser
+from jsonapi_client.parser import parse
+
 
 class TestParser(TestCase):
     def test_parse(self) -> None:
-        parsed = cast("dict", JsonAPIParser.parse(
+        parsed = cast("dict", parse(
             data={
                 "id": "1",
                 "type": "movie",
@@ -41,7 +42,7 @@ class TestParser(TestCase):
         self.assertEqual(parsed["characters"], [{"id": "2", "type": "character"}, {"id": "3", "type": "character"}])
 
     def test_parse_list(self) -> None:
-        parsed = cast("list", JsonAPIParser.parse(
+        parsed = cast("list", parse(
             data=[
                 {
                     "id": "1",
@@ -66,7 +67,7 @@ class TestParser(TestCase):
         self.assertEqual(parsed[1]["title"], "Funny Games")
 
     def test_parse_included_recursive(self) -> None:
-        parsed = cast("dict", JsonAPIParser.parse(
+        parsed = cast("dict", parse(
             data={
                 "id": "1",
                 "type": "movie",

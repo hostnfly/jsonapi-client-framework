@@ -1,5 +1,7 @@
 from unittest import TestCase
+
 from jsonapi_client.schema import JsonAPIResourceSchema
+
 
 class TestResourceSchema(TestCase):
   def test_resource_equality(self) -> None:
