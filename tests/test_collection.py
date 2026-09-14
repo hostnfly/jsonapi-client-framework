@@ -153,3 +153,20 @@ class TestClient(TestCase):
         self.assertEqual(result.year, 1997)
         self.assertEqual(result.director.full_name, "Michael Haneke")
 
+    @patch("jsonapi_client.client.request")
+    def test_create_singleton(self, test_request: MagicMock) -> None:
+        collection = MovieSingleton(base_url="http://example.com/api", auth=None)
+        fixture = Path("tests/fixtures/movie.json")
+        response = Response()
+        response.status_code = 200
+        response._content = fixture.read_bytes()
+        test_request.return_value = response
+
+        result = collection.create(title="Funny Games")
+        self.assertEqual(result.title, "Funny Games")
+        self.assertEqual(result.year, 1997)
+        self.assertEqual(result.director.full_name, "Michael Haneke")
+        _, kwargs = test_request.call_args
+        self.assertEqual(kwargs["method"], "POST")
+        self.assertEqual(kwargs["url"], "http://example.com/api/movie")
+
