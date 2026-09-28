@@ -41,6 +41,16 @@ class JsonAPISingleton(_JsonAPIBaseResource[T]):
     def resource(self) -> JsonAPIResource[T]:
         return JsonAPIResource[T](self.schema, client=self._client, include=self.include)
 
+    def create(self, **kwargs: list[Any] | dict[str, Any] | JsonType) -> T:
+        url = f"{self.base_url}{self.endpoint}"
+        client = JsonAPIClient[T](url=url, auth=self.auth)
+        query = JsonAPIQuery(include=self.include)
+        params = query.to_request_params()
+        body = serialize(**kwargs)
+        payload = client.post(body, params)
+        parsed = cast("dict[str, Any]", parse(**payload))
+        return cast("T", deserialize_resource(self.schema, parsed))
+
 
 class JsonAPICollection(_JsonAPIBaseResource[T]):
     def __init__(
